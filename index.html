@@ -68,52 +68,40 @@
 Available commands:
 • create
 • recover <private_key>
+• mine <wallet_address>
 • balance <wallet_address> <private_key>
-• mine <wallet_address> <private_key>
-• send <wallet_address> <private_key> <to> <amount> <recipient_wallet>
-• trade <wallet_address> <private_key> <usdt_amount>
+• send <from> <to> <amount> <private_key>
+• trade <wallet_address> <usdt_amount>
 `;
 
+    // Initial display
     output.innerText = COMMANDS_LIST;
+
     input.focus();
-
-    async function runCommand(command, append = false) {
-      try {
-        const res = await fetch("http://127.0.0.1:1000/terminal", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input: command })
-        });
-
-        const data = await res.json();
-        if (append) {
-          output.innerText += data.output + "\n";
-        } else {
-          output.innerText += `\n> ${command}\n${data.output}\n`;
-        }
-
-        document.getElementById("terminal").scrollTop = terminal.scrollHeight;
-      } catch (err) {
-        output.innerText += "\n❌ Could not connect to server.";
-      }
-    }
 
     input.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         const command = input.value.trim();
-        if (!command) return;
+        if (command === "") return;
+
+        // Clear and reset menu + new input
+        output.innerText = `${COMMANDS_LIST}\n> ${command}\n`;
         input.value = "";
 
-        const cmdParts = command.split(" ");
-        const isMine = cmdParts[0] === "mine" && cmdParts.length === 3;
+        try {
+          const res = await fetch("http://192.168.0.176:1000/terminal", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ input: command })
+          });
 
-        if (isMine) {
-          output.innerText += `\n> ${command}\nmining... ⛏️ warning: running another command will cancel the mine!\n`;
-          setTimeout(() => runCommand(command, true), 100);
-        } else {
-          output.innerText = COMMANDS_LIST;
-          runCommand(command);
+          const data = await res.json();
+          output.innerText += data.output + "\n";
+        } catch (err) {
+          output.innerText += "❌ Error: Could not connect to MACCI server.\n";
         }
+
+        document.getElementById("terminal").scrollTop = terminal.scrollHeight;
       }
     });
   </script>
