@@ -108,11 +108,9 @@ Available commands:
         const isMine = cmdParts[0] === "mine" && cmdParts.length === 3;
 
         if (isMine) {
-          // Show mining message and append result
           output.innerText += `\n> ${command}\nmining... ⛏️ warning: running another command will cancel the mine!\n`;
-          setTimeout(() => runCommand(command, true), 100); // delay to allow rendering
+          setTimeout(() => runCommand(command, true), 100);
         } else {
-          // Clear previous + show result
           output.innerText = COMMANDS_LIST;
           runCommand(command);
         }
