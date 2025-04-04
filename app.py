@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import hashlib, json, time, uuid
@@ -174,6 +173,7 @@ def trade_from_webhook():
     result = trade_usdt(wallet, usdt_amount)
     return jsonify({"output": result}), 200
 
+import os
 # === SERVER START ===
 if __name__ == '__main__':
     create_genesis_block()
