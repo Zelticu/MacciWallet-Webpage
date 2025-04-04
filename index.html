@@ -89,7 +89,7 @@ Available commands:
         input.value = "";
 
         try {
-          const res = await fetch("http://192.168.0.176:1000/terminal", {
+         const res = await fetch("https://macciwalletps.onrender.com/terminal", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ input: command })
