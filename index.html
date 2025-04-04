@@ -79,7 +79,7 @@ Available commands:
 
     async function runCommand(command, append = false) {
       try {
-        const res = await fetch("http://127.0.0.1:5000/terminal", {
+        const res = await fetch("http://127.0.0.1:1000/terminal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input: command })
