@@ -8,7 +8,7 @@ CORS(app)
 # === CONFIG ===
 MAX_SUPPLY = 100_000_000
 PREMINE_AMOUNT = 40_000_000
-PRESALE_RATE = 10000
+PRESALE_RATE = 10000  # 1 USDT = 10,000 MACCI
 MINING_REWARD = 10
 DIFFICULTY = 9
 
@@ -17,9 +17,20 @@ chain = []
 transactions = []
 total_mined = 0
 
+# === PREMINE WALLETS ===
 MAIN_WALLET = "7fc8cb7519f34a0dbef5b2e15ecc24be"
+w1 = "07481d281b244d018739e613bf688bf7"
+k1 = "f71c22343e704dedb8b295730c913e1c"
+
 wallets[MAIN_WALLET] = {"balance": PREMINE_AMOUNT, "private_key": "PREMINED_KEY"}
 total_mined += PREMINE_AMOUNT
+
+wallets[w1] = {"balance": 100000, "private_key": k1}
+total_mined += 100000
+
+print("✅ Premine wallet loaded:", MAIN_WALLET, "with 40,000,000 MACCI")
+print("✅ Second wallet loaded:", w1, "with 100,000 MACCI")
+print("🔍 Wallets now loaded:", wallets)
 
 # === BLOCKCHAIN CORE ===
 def create_genesis_block():
@@ -120,6 +131,17 @@ def trade_usdt(wallet, usdt_amount):
     total_mined += macci
     return f"💱 Traded {usdt} USDT → {macci} MACCI"
 
+# === PRICE ENDPOINT ===
+@app.route('/price', methods=['GET'])
+def get_price():
+    price_per_macci = 1 / PRESALE_RATE  # $0.0001
+    market_cap = total_mined * price_per_macci
+    return jsonify({
+        "price_usd": round(price_per_macci, 6),
+        "circulating_supply": total_mined,
+        "market_cap_usd": round(market_cap, 2)
+    })
+
 # === TERMINAL INTERFACE ===
 @app.route('/terminal', methods=['POST'])
 def terminal():
@@ -173,11 +195,8 @@ def trade_from_webhook():
     result = trade_usdt(wallet, usdt_amount)
     return jsonify({"output": result}), 200
 
-import os
 # === SERVER START ===
 if __name__ == '__main__':
     create_genesis_block()
     print(f"✅ MACCI server running with difficulty {DIFFICULTY}")
-    port = int(os.environ.get("PORT", 10000))  # 👈 Render assigns this
-    app.run(host="0.0.0.0", port=port)         # 👈 0.0.0.0 is required
-
+    app.run(port=1000)
