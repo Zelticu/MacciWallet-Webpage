@@ -199,4 +199,6 @@ def trade_from_webhook():
 if __name__ == '__main__':
     create_genesis_block()
     print(f"✅ MACCI server running with difficulty {DIFFICULTY}")
-    app.run(port=1000)
+    import os
+    port = int(os.environ.get("PORT", 1000))
+    app.run(host="0.0.0.0", port=port)
