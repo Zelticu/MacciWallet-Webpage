@@ -10,21 +10,23 @@
       color: white;
       font-family: 'Comfortaa', sans-serif;
       text-align: center;
-      padding: 2rem;
+      padding: 1rem;
+      margin: 0;
+      overflow-x: hidden;
     }
     canvas {
-      max-width: 100%;
+      max-width: 90vw;
+      height: 300px !important;
     }
   </style>
 </head>
 <body>
   <h1 style="color:crimson;">📈 MACCI Live Price Chart</h1>
-  <canvas id="priceChart" width="800" height="400"></canvas>
+  <canvas id="priceChart"></canvas>
 
   <script>
     async function loadPriceData() {
       const res = await fetch("https://macciwalletps.onrender.com/price_data");
-
       const data = await res.json();
 
       const labels = data.map(p => new Date(p.timestamp).toLocaleTimeString());
@@ -48,7 +50,18 @@
           responsive: true,
           scales: {
             x: { title: { display: true, text: 'Time' } },
-            y: { title: { display: true, text: 'Price (USD)' } }
+            y: {
+              title: { display: true, text: 'Price (USD)' },
+              min: 0.0001,
+              max: 0.01
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: 'white'
+              }
+            }
           }
         }
       });
