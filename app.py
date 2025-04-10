@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import hashlib, json, time, uuid
+import hashlib, json, time, uuid, os
 
 app = Flask(__name__)
 CORS(app)
@@ -8,7 +8,7 @@ CORS(app)
 # === CONFIG ===
 MAX_SUPPLY = 100_000_000
 PREMINE_AMOUNT = 40_000_000
-PRESALE_RATE = 1000  # 1 USDT = 1,000 MACCI (Price = $0.001)  # 1 USDT = 10,000 MACCI
+PRESALE_RATE = 1000  # 1 USDT = 1,000 MACCI (Price = $0.001)
 MINING_REWARD = 10
 DIFFICULTY = 9
 
@@ -131,16 +131,43 @@ def trade_usdt(wallet, usdt_amount):
     total_mined += macci
     return f"💱 Traded {usdt} USDT → {macci} MACCI"
 
-# === PRICE ENDPOINT ===
+# === PRICE ENDPOINTS ===
 @app.route('/price', methods=['GET'])
 def get_price():
-    price_per_macci = 1 / PRESALE_RATE  # $0.0001
+    price_per_macci = 1 / PRESALE_RATE
     market_cap = total_mined * price_per_macci
     return jsonify({
         "price_usd": round(price_per_macci, 6),
         "circulating_supply": total_mined,
         "market_cap_usd": round(market_cap, 2)
     })
+
+@app.route('/log_price', methods=['GET'])
+def log_price():
+    try:
+        price_per_macci = 1 / PRESALE_RATE
+        entry = {"timestamp": int(time.time()) * 1000, "price": round(price_per_macci, 6)}
+
+        if os.path.exists("price_log.json"):
+            with open("price_log.json", "r") as f:
+                data = json.load(f)
+        else:
+            data = []
+
+        data.append(entry)
+        with open("price_log.json", "w") as f:
+            json.dump(data[-300:], f)
+        return jsonify({"status": "✅ Logged", "data": entry})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/price_data', methods=['GET'])
+def get_price_data():
+    if os.path.exists("price_log.json"):
+        with open("price_log.json", "r") as f:
+            return jsonify(json.load(f))
+    else:
+        return jsonify([])
 
 # === TERMINAL INTERFACE ===
 @app.route('/terminal', methods=['POST'])
@@ -199,6 +226,5 @@ def trade_from_webhook():
 if __name__ == '__main__':
     create_genesis_block()
     print(f"✅ MACCI server running with difficulty {DIFFICULTY}")
-    import os
     port = int(os.environ.get("PORT", 1000))
     app.run(host="0.0.0.0", port=port)
