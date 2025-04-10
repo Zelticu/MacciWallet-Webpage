@@ -23,7 +23,8 @@
 
   <script>
     async function loadPriceData() {
-      const res = await fetch("https://your-render-app-url.onrender.com/price_data");
+      const res = await fetch("https://macciwalletps.onrender.com/price_data");
+
       const data = await res.json();
 
       const labels = data.map(p => new Date(p.timestamp).toLocaleTimeString());
